@@ -37,6 +37,7 @@ Node *new_node_num(int val);
 int consume(int ty);
 Node *expr();
 Node *mul();
+Node *term();
 Node *num();
 void tokenize();
 void gen(Node *node);
@@ -93,16 +94,28 @@ Node *expr() {
 }
 
 Node *mul() {
-    Node *node = num();
+    Node *node = term();
 
     for (;;) {
         if (consume('*'))
-            node = new_node('*', node, num());
+            node = new_node('*', node, term());
         else if (consume('/'))
-            node = new_node('/', node, num());
+            node = new_node('/', node, term());
         else
             return node;
     }
+}
+
+Node *term() {
+    if (consume('(')) {
+        Node *node = expr();
+        if (!consume(')'))
+            error_at(tokens[pos].input,
+                     "開きカッコに対応する閉じカッコがありません");
+        return node;
+    }
+
+    return num();
 }
 
 Node *num(){
@@ -157,7 +170,8 @@ void tokenize() {
         }
 
         if (*p == '+' || *p == '-' ||
-            *p == '*' || *p == '/') {
+            *p == '*' || *p == '/' ||
+            *p == '(' || *p == ')' ) {
             tokens[i].ty = *p;
             tokens[i].input = p;
             i++;

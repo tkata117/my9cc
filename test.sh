@@ -10,7 +10,7 @@ try() {
     actual="$?"
 
     if [ "$expected" = "$actual" ]; then
-        echo "$input = > $actual"
+        echo "$input => $actual"
     else
         echo "$expected expected, but got $actual"
         exit 1

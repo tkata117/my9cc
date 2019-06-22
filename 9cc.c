@@ -35,8 +35,9 @@ void error_at(char *loc, char *msg);
 Node *new_node(int ty, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 int consume(int ty);
-Node *num();
 Node *expr();
+Node *mul();
+Node *num();
 void tokenize();
 void gen(Node *node);
 
@@ -79,13 +80,26 @@ int consume(int ty) {
 }
 
 Node *expr() {
-    Node *node = num();
+    Node *node = mul();
 
     for (;;) {
         if (consume('+'))
-            node = new_node('+', node, num());
+            node = new_node('+', node, mul());
         else if (consume('-'))
-            node = new_node('-', node, num());
+            node = new_node('-', node, mul());
+        else
+            return node;
+    }
+}
+
+Node *mul() {
+    Node *node = num();
+
+    for (;;) {
+        if (consume('*'))
+            node = new_node('*', node, num());
+        else if (consume('/'))
+            node = new_node('/', node, num());
         else
             return node;
     }
@@ -119,6 +133,13 @@ void gen(Node *node) {
     case '-':
         printf("  sub rax, rdi\n");
         break;
+    case '*':
+        printf("  imul rdi\n");
+        break;
+    case '/':
+        printf("  cqo\n");
+        printf("  idiv rdi\n");
+        break;
     }
 
     printf("  push rax\n");
@@ -135,7 +156,8 @@ void tokenize() {
             continue;
         }
 
-        if (*p == '+' || *p == '-') {
+        if (*p == '+' || *p == '-' ||
+            *p == '*' || *p == '/') {
             tokens[i].ty = *p;
             tokens[i].input = p;
             i++;

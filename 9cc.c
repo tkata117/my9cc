@@ -6,6 +6,8 @@
 
 enum {
     TK_NUM = 256,
+    TK_EQ,
+    TK_NE,
     TK_EOF,
 };
 
@@ -36,6 +38,8 @@ Node *new_node(int ty, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 int consume(int ty);
 Node *expr();
+Node *equality();
+Node *add();
 Node *mul();
 Node *unary();
 Node *term();
@@ -82,6 +86,23 @@ int consume(int ty) {
 }
 
 Node *expr() {
+    return equality();
+}
+
+Node *equality() {
+    Node *node = add();
+
+    for (;;) {
+        if (consume(TK_EQ))
+            node = new_node(TK_EQ, node, add());
+        else if (consume(TK_NE))
+            node = new_node(TK_NE, node, add());
+        else
+            return node;
+    }
+}
+
+Node *add() {
     Node *node = mul();
 
     for (;;) {
@@ -162,6 +183,16 @@ void gen(Node *node) {
         printf("  cqo\n");
         printf("  idiv rdi\n");
         break;
+    case TK_EQ:
+        printf("  cmp rax, rdi\n");
+        printf("  sete al\n");
+        printf("  movzb rax, al\n");
+        break;
+    case TK_NE:
+        printf("  cmp rax, rdi\n");
+        printf("  setne al\n");
+        printf("  movzb rax, al\n");
+        break;
     }
 
     printf("  push rax\n");
@@ -185,6 +216,22 @@ void tokenize() {
             tokens[i].input = p;
             i++;
             p++;
+            continue;
+        }
+
+        if (strncmp(p, "==", 2) == 0) {
+            tokens[i].ty = TK_EQ;
+            tokens[i].input = p;
+            i++;
+            p += 2;
+            continue;
+        }
+
+        if (strncmp(p, "!=", 2) == 0) {
+            tokens[i].ty = TK_NE;
+            tokens[i].input = p;
+            i++;
+            p += 2;
             continue;
         }
 

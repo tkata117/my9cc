@@ -32,10 +32,23 @@ typedef struct Node {
     int val;
 } Node;
 
+typedef struct {
+    void **data;
+    int capacity;
+    int len;
+} Vector;
+
 char *user_input;
-Token tokens[100];
+Vector *tokens;
 int pos = 0;
 
+// Test functions
+void expect(int line, int expected, int actual);
+void runtest();
+
+Token *get_token(int idx);
+Vector *new_vector();
+void vec_push(Vector *vec, void *elem);
 void error(char *fmt, ...);
 void error_at(char *loc, char *msg);
 Node *new_node(int ty, Node *lhs, Node *rhs);
@@ -51,6 +64,54 @@ Node *term();
 Node *num();
 void tokenize();
 void gen(Node *node);
+
+
+void expect(int line, int expected, int actual) {
+    if (expected == actual)
+        return;
+    fprintf(stderr, "%d: %d expected, but got %d\n",
+            line, expected, actual);
+    exit(1);
+}
+
+void runtest() {
+    Vector *vec = new_vector();
+    expect(__LINE__, 0, vec->len);
+
+    for (int i = 0; i < 100; i++)
+        vec_push(vec, (void *)i);
+
+    expect(__LINE__, 100, vec->len);
+    expect(__LINE__, 0, (long)vec->data[0]);
+    expect(__LINE__, 50, (long)vec->data[50]);
+    expect(__LINE__, 99, (long)vec->data[99]);
+
+    printf("OK\n");
+}
+
+
+Token *get_token(int idx) {
+    if (idx > pos)
+        error("[get_token]: 引数idx(%d) の値が pos変数(%d) より大きいです。",
+              idx, pos);
+    return (Token *)tokens->data[idx];
+}
+
+Vector *new_vector() {
+    Vector *vec = malloc(sizeof(Vector));
+    vec->data = malloc(sizeof(void *) * 16);
+    vec->capacity = 16;
+    vec->len = 0;
+    return vec;
+}
+
+void vec_push(Vector *vec, void *elem) {
+    if (vec->capacity == vec->len) {
+        vec->capacity *= 2;
+        vec->data = realloc(vec->data, sizeof(void *) * vec->capacity);
+    }
+    vec->data[vec->len++] = elem;
+}
 
 void error(char *fmt, ...) {
     va_list ap;
@@ -84,7 +145,8 @@ Node *new_node_num(int val) {
 }
 
 int consume(int ty) {
-    if (tokens[pos].ty != ty)
+    Token *token = get_token(pos);
+    if ( token->ty != ty)
         return 0;
     pos++;
     return 1;
@@ -161,8 +223,9 @@ Node *unary() {
 Node *term() {
     if (consume('(')) {
         Node *node = expr();
+        Token *token = get_token(pos);
         if (!consume(')'))
-            error_at(tokens[pos].input,
+            error_at( token->input,
                      "開きカッコに対応する閉じカッコがありません");
         return node;
     }
@@ -171,10 +234,13 @@ Node *term() {
 }
 
 Node *num(){
-    if (tokens[pos].ty == TK_NUM)
-        return new_node_num(tokens[pos++].val);
+    Token *token = get_token(pos);
+    if ( token->ty == TK_NUM) {
+        pos++;
+        return new_node_num(token->val);
+    }
 
-    error_at(tokens[pos].input,
+    error_at(token->input,
              "数値ではないトークンです");
     return NULL;
 }
@@ -234,42 +300,52 @@ void gen(Node *node) {
 
 void tokenize() {
     char *p = user_input;
+    tokens = new_vector();
+
+    Token *new_token;
 
     int i = 0;
     while (*p) {
-
         if (isspace(*p)) {
             p++;
             continue;
         }
 
         if (strncmp(p, "==", 2) == 0) {
-            tokens[i].ty = TK_EQ;
-            tokens[i].input = p;
+            new_token = malloc(sizeof(Token));
+            new_token->ty = TK_EQ;
+            new_token->input = p;
+            vec_push(tokens, (void *)new_token);
             i++;
             p += 2;
             continue;
         }
 
         if (strncmp(p, "!=", 2) == 0) {
-            tokens[i].ty = TK_NE;
-            tokens[i].input = p;
+            new_token = malloc(sizeof(Token));
+            new_token->ty = TK_NE;
+            new_token->input = p;
+            vec_push(tokens, (void *)new_token);
             i++;
             p += 2;
             continue;
         }
 
         if (strncmp(p, ">=", 2) == 0) {
-            tokens[i].ty = TK_GE;
-            tokens[i].input = p;
+            new_token = malloc(sizeof(Token));
+            new_token->ty = TK_GE;
+            new_token->input = p;
+            vec_push(tokens, (void *)new_token);
             i++;
             p += 2;
             continue;
         }
 
         if (strncmp(p, "<=", 2) == 0) {
-            tokens[i].ty = TK_LE;
-            tokens[i].input = p;
+            new_token = malloc(sizeof(Token));
+            new_token->ty = TK_LE;
+            new_token->input = p;
+            vec_push(tokens, (void *)new_token);
             i++;
             p += 2;
             continue;
@@ -278,16 +354,20 @@ void tokenize() {
         if (*p == '+' || *p == '-' ||
             *p == '*' || *p == '/' ||
             *p == '(' || *p == ')' ) {
-            tokens[i].ty = *p;
-            tokens[i].input = p;
+            new_token = malloc(sizeof(Token));
+            new_token->ty = *p;
+            new_token->input = p;
+            vec_push(tokens, (void *)new_token);
             i++;
             p++;
             continue;
         }
 
         if (*p == '>') {
-            tokens[i].ty = TK_GT;
-            tokens[i].input = p;
+            new_token = malloc(sizeof(Token));
+            new_token->ty = TK_GT;
+            new_token->input = p;
+            vec_push(tokens, (void *)new_token);
             i++;
             p++;
             continue;
@@ -295,17 +375,21 @@ void tokenize() {
 
 
         if (*p == '<') {
-            tokens[i].ty = TK_LT;
-            tokens[i].input = p;
+            new_token = malloc(sizeof(Token));
+            new_token->ty = TK_LT;
+            new_token->input = p;
+            vec_push(tokens, (void *)new_token);
             i++;
             p++;
             continue;
         }
 
         if (isdigit(*p)) {
-            tokens[i].ty = TK_NUM;
-            tokens[i].input = p;
-            tokens[i].val = strtol(p, &p, 10);
+            new_token = malloc(sizeof(Token));
+            new_token->ty = TK_NUM;
+            new_token->input = p;
+            new_token->val = strtol(p, &p, 10);
+            vec_push(tokens, (void *)new_token);
             i++;
             continue;
         }
@@ -313,8 +397,10 @@ void tokenize() {
         error_at(p, "トークナイズできません");
     }
 
-    tokens[i].ty = TK_EOF;
-    tokens[i].input = p;
+    new_token = malloc(sizeof(Token));
+    new_token->ty = TK_EOF;
+    new_token->input = p;
+    vec_push(tokens, (void *)new_token);
 }
 
 
@@ -323,6 +409,11 @@ int main(int argc, char *argv[]) {
     if (argc != 2) {
         error("引数の個数が正しくありません");
         return 1;
+    }
+
+    if (strncmp(argv[1], "-test", 5) == 0) {
+        runtest();
+        return 0;
     }
 
     // tokenize and parse

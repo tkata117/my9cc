@@ -8,6 +8,10 @@ enum {
     TK_NUM = 256,
     TK_EQ,
     TK_NE,
+    TK_LT,
+    TK_LE,
+    TK_GT,
+    TK_GE,
     TK_EOF,
 };
 
@@ -39,6 +43,7 @@ Node *new_node_num(int val);
 int consume(int ty);
 Node *expr();
 Node *equality();
+Node *relational();
 Node *add();
 Node *mul();
 Node *unary();
@@ -90,13 +95,30 @@ Node *expr() {
 }
 
 Node *equality() {
-    Node *node = add();
+    Node *node = relational();
 
     for (;;) {
         if (consume(TK_EQ))
-            node = new_node(TK_EQ, node, add());
+            node = new_node(TK_EQ, node, relational());
         else if (consume(TK_NE))
-            node = new_node(TK_NE, node, add());
+            node = new_node(TK_NE, node, relational());
+        else
+            return node;
+    }
+}
+
+Node *relational() {
+    Node *node = add();
+
+    for (;;) {
+        if (consume(TK_GT))
+            node = new_node(TK_LT, add(), node);
+        else if (consume(TK_GE))
+            node = new_node(TK_LE, add(), node);
+        else if (consume(TK_LT))
+            node = new_node(TK_LT, node, add());
+        else if (consume(TK_LE))
+            node = new_node(TK_LE, node, add());
         else
             return node;
     }
@@ -193,6 +215,17 @@ void gen(Node *node) {
         printf("  setne al\n");
         printf("  movzb rax, al\n");
         break;
+    case TK_LE:
+        printf("  cmp rax, rdi\n");
+        printf("  setle al\n");
+        printf("  movzb rax, al\n");
+        break;
+    case TK_LT:
+        printf("  cmp rax, rdi\n");
+        printf("  setl al\n");
+        printf("  movzb rax, al\n");
+        break;
+
     }
 
     printf("  push rax\n");
@@ -204,17 +237,8 @@ void tokenize() {
 
     int i = 0;
     while (*p) {
-        if (isspace(*p)) {
-            p++;
-            continue;
-        }
 
-        if (*p == '+' || *p == '-' ||
-            *p == '*' || *p == '/' ||
-            *p == '(' || *p == ')' ) {
-            tokens[i].ty = *p;
-            tokens[i].input = p;
-            i++;
+        if (isspace(*p)) {
             p++;
             continue;
         }
@@ -232,6 +256,49 @@ void tokenize() {
             tokens[i].input = p;
             i++;
             p += 2;
+            continue;
+        }
+
+        if (strncmp(p, ">=", 2) == 0) {
+            tokens[i].ty = TK_GE;
+            tokens[i].input = p;
+            i++;
+            p += 2;
+            continue;
+        }
+
+        if (strncmp(p, "<=", 2) == 0) {
+            tokens[i].ty = TK_LE;
+            tokens[i].input = p;
+            i++;
+            p += 2;
+            continue;
+        }
+
+        if (*p == '+' || *p == '-' ||
+            *p == '*' || *p == '/' ||
+            *p == '(' || *p == ')' ) {
+            tokens[i].ty = *p;
+            tokens[i].input = p;
+            i++;
+            p++;
+            continue;
+        }
+
+        if (*p == '>') {
+            tokens[i].ty = TK_GT;
+            tokens[i].input = p;
+            i++;
+            p++;
+            continue;
+        }
+
+
+        if (*p == '<') {
+            tokens[i].ty = TK_LT;
+            tokens[i].input = p;
+            i++;
+            p++;
             continue;
         }
 

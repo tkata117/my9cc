@@ -88,12 +88,20 @@ void tokenize() {
             continue;
         }
 
-        if ('a' <= *p && *p <= 'z') {            
+        if ('a' <= *p && *p <= 'z') {
+            int len = 0;
+
             new_token = malloc(sizeof(Token));
             new_token->ty = TK_IDENT;
             new_token->input = p;
+
+            while ('a' <= *p && *p <= 'z') {
+                p++;
+                len++;
+            }
+            new_token->len = len;
+
             vec_push(tokens, (void *)new_token);
-            p++;
             continue;
         }
 
@@ -130,10 +138,27 @@ Node *new_node_num(int val) {
     return node;
 }
 
-Node *new_node_lvar(char varname) {
+Node *new_node_lvar(Token *tok) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_LVAR;
-    node->offset = (varname - 'a' + 1) * 8;
+
+    LVar *lvar = find_lvar(tok);
+    if (lvar) {
+        node->offset = lvar->offset;
+    } else {
+        lvar = malloc(sizeof(LVar));
+        lvar->next = locals;
+        lvar->name = tok->input;
+        lvar->len = tok->len;
+        if (locals) {
+            lvar->offset = locals->offset + 8;
+        } else {
+            lvar->offset = 8;
+        }
+        node->offset = lvar->offset;
+        locals = lvar;
+    }
+
     return node;
 }
 
@@ -144,6 +169,17 @@ int consume(int ty) {
     pos++;
     return 1;
 }
+
+
+LVar *find_lvar(Token *tok) {
+    for (LVar *var = locals; var; var = var->next) {
+        if ( (var->len == tok->len) && (memcmp(tok->input, var->name, var->len) == 0) ) {
+            return var;
+        }
+    }
+    return NULL;
+}
+
 
 void program() {
     int i = 0;
@@ -259,7 +295,7 @@ Node *term() {
 
     if (token->ty == TK_IDENT) {
         pos++;
-        return new_node_lvar(token->input[0]);
+        return new_node_lvar(token);
     }
 
 

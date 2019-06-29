@@ -4,6 +4,7 @@ char *user_input;
 Vector *tokens;
 int pos = 0;
 Node *code[100];
+LVar *locals = NULL;
 
 void error(char *fmt, ...) {
     va_list ap;

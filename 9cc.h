@@ -20,6 +20,7 @@ typedef struct {
     int ty;
     int val;
     char *input;
+    int len;
 } Token;
 
 enum {
@@ -41,10 +42,19 @@ typedef struct {
     int len;
 } Vector;
 
+
+typedef struct LVar {
+    struct LVar *next;
+    char *name;
+    int len;
+    int offset;
+} LVar;
+
 extern char *user_input;
 extern Vector *tokens;
 extern int pos;
 extern Node *code[100];
+extern LVar *locals;
 
 void error(char *fmt, ...);
 void error_at(char *loc, char *msg);
@@ -53,9 +63,11 @@ Token *get_token(int idx);
 Vector *new_vector();
 void vec_push(Vector *vec, void *elem);
 
+LVar *find_lvar(Token *tok);
+
 Node *new_node(int ty, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
-Node *new_node_lvar(char varname);
+Node *new_node_lvar(Token *tok);
 int consume(int ty);
 
 void program();

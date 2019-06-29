@@ -6,7 +6,6 @@ void tokenize() {
 
     Token *new_token;
 
-    int i = 0;
     while (*p) {
         if (isspace(*p)) {
             p++;
@@ -18,7 +17,6 @@ void tokenize() {
             new_token->ty = TK_EQ;
             new_token->input = p;
             vec_push(tokens, (void *)new_token);
-            i++;
             p += 2;
             continue;
         }
@@ -28,7 +26,6 @@ void tokenize() {
             new_token->ty = TK_NE;
             new_token->input = p;
             vec_push(tokens, (void *)new_token);
-            i++;
             p += 2;
             continue;
         }
@@ -38,7 +35,6 @@ void tokenize() {
             new_token->ty = TK_GE;
             new_token->input = p;
             vec_push(tokens, (void *)new_token);
-            i++;
             p += 2;
             continue;
         }
@@ -48,7 +44,6 @@ void tokenize() {
             new_token->ty = TK_LE;
             new_token->input = p;
             vec_push(tokens, (void *)new_token);
-            i++;
             p += 2;
             continue;
         }
@@ -61,7 +56,6 @@ void tokenize() {
             new_token->ty = *p;
             new_token->input = p;
             vec_push(tokens, (void *)new_token);
-            i++;
             p++;
             continue;
         }
@@ -71,7 +65,6 @@ void tokenize() {
             new_token->ty = TK_GT;
             new_token->input = p;
             vec_push(tokens, (void *)new_token);
-            i++;
             p++;
             continue;
         }
@@ -82,7 +75,6 @@ void tokenize() {
             new_token->ty = TK_LT;
             new_token->input = p;
             vec_push(tokens, (void *)new_token);
-            i++;
             p++;
             continue;
         }
@@ -93,16 +85,14 @@ void tokenize() {
             new_token->input = p;
             new_token->val = strtol(p, &p, 10);
             vec_push(tokens, (void *)new_token);
-            i++;
             continue;
         }
 
-        if ('a' <= *p && *p <= 'z') {
+        if ('a' <= *p && *p <= 'z') {            
             new_token = malloc(sizeof(Token));
             new_token->ty = TK_IDENT;
             new_token->input = p;
             vec_push(tokens, (void *)new_token);
-            i++;
             p++;
             continue;
         }

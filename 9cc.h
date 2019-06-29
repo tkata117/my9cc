@@ -6,6 +6,7 @@
 
 enum {
     TK_NUM = 256,
+    TK_IDENT,
     TK_EQ,
     TK_NE,
     TK_LT,
@@ -23,6 +24,7 @@ typedef struct {
 
 enum {
     ND_NUM = 256,
+    ND_LVAR,
 };
 
 typedef struct Node {
@@ -30,6 +32,7 @@ typedef struct Node {
     struct Node *lhs;
     struct Node *rhs;
     int val;
+    int offset;
 } Node;
 
 typedef struct {
@@ -41,6 +44,7 @@ typedef struct {
 extern char *user_input;
 extern Vector *tokens;
 extern int pos;
+extern Node *code[100];
 
 void error(char *fmt, ...);
 void error_at(char *loc, char *msg);
@@ -51,16 +55,23 @@ void vec_push(Vector *vec, void *elem);
 
 Node *new_node(int ty, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
+Node *new_node_lvar(char varname);
 int consume(int ty);
+
+void program();
+Node *stmt();
 Node *expr();
+Node *assign();
 Node *equality();
 Node *relational();
 Node *add();
 Node *mul();
 Node *unary();
 Node *term();
-Node *num();
+
 void tokenize();
+
+void gen_lval(Node *node);
 void gen(Node *node);
 
 

@@ -55,7 +55,8 @@ void tokenize() {
 
         if (*p == '+' || *p == '-' ||
             *p == '*' || *p == '/' ||
-            *p == '(' || *p == ')' ) {
+            *p == '(' || *p == ')' ||
+            *p == '=' || *p == ';' ) {
             new_token = malloc(sizeof(Token));
             new_token->ty = *p;
             new_token->input = p;
@@ -96,6 +97,16 @@ void tokenize() {
             continue;
         }
 
+        if ('a' <= *p && *p <= 'z') {
+            new_token = malloc(sizeof(Token));
+            new_token->ty = TK_IDENT;
+            new_token->input = p;
+            vec_push(tokens, (void *)new_token);
+            i++;
+            p++;
+            continue;
+        }
+
         error_at(p, "トークナイズできません");
     }
 
@@ -129,6 +140,13 @@ Node *new_node_num(int val) {
     return node;
 }
 
+Node *new_node_lvar(char varname) {
+    Node *node = malloc(sizeof(Node));
+    node->ty = ND_LVAR;
+    node->offset = (varname - 'a' + 1) * 8;
+    return node;
+}
+
 int consume(int ty) {
     Token *token = get_token(pos);
     if ( token->ty != ty)
@@ -137,8 +155,36 @@ int consume(int ty) {
     return 1;
 }
 
+void program() {
+    int i = 0;
+    Token *token = get_token(pos);
+    while (token->ty != TK_EOF) {
+        code[i++] = stmt();
+        token = get_token(pos);
+    }
+    code[i] = NULL;
+}
+
+Node *stmt() {
+    Node *node = expr();
+    if (!consume(';')) {
+        Token *token = get_token(pos);
+        error_at(token->input, "';'ではないトークンです");
+    }
+    return node;
+}
+
 Node *expr() {
-    return equality();
+    return assign();
+}
+
+Node *assign() {
+    Node *node = equality();
+
+    if (consume('=')) {
+        node = new_node('=', node, assign());
+    }
+    return node;
 }
 
 Node *equality() {
@@ -206,26 +252,28 @@ Node *unary() {
 }
 
 Node *term() {
+    Token *token = get_token(pos);
+
     if (consume('(')) {
         Node *node = expr();
-        Token *token = get_token(pos);
         if (!consume(')'))
             error_at( token->input,
                      "開きカッコに対応する閉じカッコがありません");
         return node;
     }
 
-    return num();
-}
-
-Node *num(){
-    Token *token = get_token(pos);
-    if ( token->ty == TK_NUM) {
+    if (token->ty == TK_NUM) {
         pos++;
         return new_node_num(token->val);
     }
 
+    if (token->ty == TK_IDENT) {
+        pos++;
+        return new_node_lvar(token->input[0]);
+    }
+
+
     error_at(token->input,
-             "数値ではないトークンです");
+             "数値 or 変数 ではないトークンです");
     return NULL;
 }

@@ -118,9 +118,9 @@ void tokenize() {
 
 
 Token *get_token(int idx) {
-    if (idx > pos)
-        error("[get_token]: 引数idx(%d) の値が pos変数(%d) より大きいです。",
-              idx, pos);
+    if (idx > tokens->len)
+        error("[get_token]: 引数idx(%d) の値が トークン数(%d) より大きいです。",
+              idx, tokens->len);
     return (Token *)tokens->data[idx];
 }
 

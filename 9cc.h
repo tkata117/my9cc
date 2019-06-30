@@ -28,6 +28,12 @@ enum {
     ND_NUM = 256,
     ND_LVAR,
     ND_RETURN,
+    ND_EQ,
+    ND_NE,
+    ND_LT,
+    ND_LE,
+    ND_GT,
+    ND_GE,
 };
 
 typedef struct Node {

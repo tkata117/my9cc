@@ -62,4 +62,7 @@ try 18 "b=2; z=(4+b)*3;"
 try 10 "foo=2; bar=4+foo*3;"
 try 18 "foo=2; hoge=(4+foo)*3;"
 
+try 14 "a=3; b = 5 * 6 -8; return a + b / 2;"
+try 5  "return 5; return 8;"
+
 echo OK

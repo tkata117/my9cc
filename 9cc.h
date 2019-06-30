@@ -7,6 +7,7 @@
 enum {
     TK_NUM = 256,
     TK_IDENT,
+    TK_RETURN,
     TK_EQ,
     TK_NE,
     TK_LT,
@@ -26,6 +27,7 @@ typedef struct {
 enum {
     ND_NUM = 256,
     ND_LVAR,
+    ND_RETURN,
 };
 
 typedef struct Node {
@@ -68,7 +70,9 @@ LVar *find_lvar(Token *tok);
 Node *new_node(int ty, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 Node *new_node_lvar(Token *tok);
+
 int consume(int ty);
+int is_alnum(char c);
 
 void program();
 Node *stmt();

@@ -12,6 +12,15 @@ void tokenize() {
             continue;
         }
 
+        if (strncmp(p, "return", 6) == 0 && !is_alnum(p[6])) {
+            new_token = malloc(sizeof(Token));
+            new_token->ty = TK_RETURN;
+            new_token->input = p;
+            vec_push(tokens, (void *)new_token);
+            p += 6;
+            continue;
+        }
+
         if (strncmp(p, "==", 2) == 0) {
             new_token = malloc(sizeof(Token));
             new_token->ty = TK_EQ;
@@ -170,6 +179,12 @@ int consume(int ty) {
     return 1;
 }
 
+int is_alnum(char c) {
+    return ( ('a' <= c && c <= 'z') ||
+             ('A' <= c && c <= 'Z') ||
+             ('0' <= c && c <= '9') ||
+             (c == '_') );
+}
 
 LVar *find_lvar(Token *tok) {
     for (LVar *var = locals; var; var = var->next) {
@@ -193,7 +208,14 @@ void program() {
 }
 
 Node *stmt() {
-    Node *node = expr();
+    Node *node;
+
+    if (consume(TK_RETURN)) {
+        node = new_node(ND_RETURN, expr(), NULL);
+    } else {
+        node = expr();
+    }
+
     if (!consume(';')) {
         Token *token = get_token(pos);
         error_at(token->input, "';'ではないトークンです");

@@ -14,6 +14,7 @@ enum {
     TK_LE,
     TK_GT,
     TK_GE,
+    TK_IF,
     TK_EOF,
 };
 
@@ -33,6 +34,7 @@ enum {
     ND_LT,
     ND_LE,
     ND_GT,
+    ND_IF,
     ND_GE,
 };
 
@@ -40,6 +42,9 @@ typedef struct Node {
     int ty;
     struct Node *lhs;
     struct Node *rhs;
+    struct Node *cond;
+    struct Node *then_stmt;
+    
     int val;
     int offset;
 } Node;
@@ -63,6 +68,7 @@ extern Vector *tokens;
 extern int pos;
 extern Node *code[100];
 extern LVar *locals;
+extern int label_cnt;
 
 void error(char *fmt, ...);
 void error_at(char *loc, char *msg);
@@ -76,6 +82,7 @@ LVar *find_lvar(Token *tok);
 Node *new_node(int ty, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 Node *new_node_lvar(Token *tok);
+Node *new_node_if(Node *cond, Node *then_stmt);
 
 int consume(int ty);
 int is_alnum(char c);

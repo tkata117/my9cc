@@ -5,6 +5,7 @@ Vector *tokens;
 int pos = 0;
 Node *code[100];
 LVar *locals = NULL;
+int label_cnt = 0;
 
 void error(char *fmt, ...) {
     va_list ap;

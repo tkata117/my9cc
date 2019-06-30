@@ -21,6 +21,15 @@ void tokenize() {
             continue;
         }
 
+        if (strncmp(p, "if", 2) == 0 && !is_alnum(p[2])) {
+            new_token = malloc(sizeof(Token));
+            new_token->ty = TK_IF;
+            new_token->input = p;
+            vec_push(tokens, (void *)new_token);
+            p += 2;
+            continue;
+        }
+
         if (strncmp(p, "==", 2) == 0) {
             new_token = malloc(sizeof(Token));
             new_token->ty = TK_EQ;
@@ -171,6 +180,15 @@ Node *new_node_lvar(Token *tok) {
     return node;
 }
 
+Node *new_node_if(Node *cond, Node *then_stmt) {
+    Node *node = malloc(sizeof(Node));
+    node->ty = ND_IF;
+    node->cond = cond;
+    node->then_stmt = then_stmt;
+
+    return node;
+}
+
 int consume(int ty) {
     Token *token = get_token(pos);
     if ( token->ty != ty)
@@ -212,6 +230,22 @@ Node *stmt() {
 
     if (consume(TK_RETURN)) {
         node = new_node(ND_RETURN, expr(), NULL);
+    } else if (consume(TK_IF)) {
+        if (!consume('(')) {
+            Token *token = get_token(pos);
+            error_at(token->input, "'('ではないトークンです");
+        }
+
+        Node *expr_node = expr();
+
+        if (!consume(')')) {
+            Token *token = get_token(pos);
+            error_at(token->input, "')'ではないトークンです");
+        }
+
+        node = new_node_if(expr_node, stmt());
+
+        return node;
     } else {
         node = expr();
     }

@@ -173,7 +173,8 @@ int consume(int ty) {
 
 LVar *find_lvar(Token *tok) {
     for (LVar *var = locals; var; var = var->next) {
-        if ( (var->len == tok->len) && (memcmp(tok->input, var->name, var->len) == 0) ) {
+        if ( (var->len == tok->len) &&
+             (memcmp(tok->input, var->name, var->len) == 0) ) {
             return var;
         }
     }

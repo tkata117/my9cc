@@ -46,7 +46,8 @@ int main(int argc, char *argv[]) {
     // プロローグ
     printf("  push rbp\n");
     printf("  mov rbp, rsp\n");
-    printf("  sub rsp, 208\n");
+    if (locals)
+        printf("  sub rsp, %d\n", locals->offset);
 
     // gen code
     for (int i = 0; code[i]; i++) {

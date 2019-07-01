@@ -117,5 +117,9 @@ try 10 "a=0; while (a < 10) while (a < 10) a = a+1; a;"
 ## for 文の入れ子
 try 25 "a=0; for (i=0; i < 5; i=i+1) for (j=0; j < 5; j=j+1) a = a+1; a;"
 
+# ステップ13: ブロック
+try 1 "{} 1;"
+try 2 "a=1; {a=a+1;} a;"
+try 3 "a=1; {a=a+1; a=a+1;} a;"
 
 echo OK

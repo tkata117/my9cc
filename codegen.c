@@ -12,6 +12,7 @@ void gen_lval(Node *node) {
 void gen(Node *node) {
 
     int cur_label_cnt;
+    Vector *block_stmts;
 
     switch (node->ty) {
     case ND_NUM:
@@ -100,6 +101,18 @@ void gen(Node *node) {
         }
         printf("  jmp .Lbegin%d\n", cur_label_cnt);
         printf(".Lend%d:\n", cur_label_cnt);
+        return;
+    case ND_BLOCK:
+        block_stmts = node->block_stmts;
+        for (int i = 0; i < block_stmts->len; i++) {          
+            gen((Node *)block_stmts->data[i]);
+
+            // 各ステートメントは1つの値をスタックに残すので、毎回popする
+            // ただし、Blockの最後の式の評価結果はstackに残す
+            if (i != (block_stmts->len - 1)) {
+                printf("  pop rax\n");
+            }
+        }
         return;
     }
 

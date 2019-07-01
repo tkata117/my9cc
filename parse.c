@@ -96,6 +96,7 @@ void tokenize() {
         if (*p == '+' || *p == '-' ||
             *p == '*' || *p == '/' ||
             *p == '(' || *p == ')' ||
+            *p == '{' || *p == '}' ||
             *p == '=' || *p == ';' ) {
             new_token = malloc(sizeof(Token));
             new_token->ty = *p;
@@ -358,6 +359,16 @@ Node *stmt() {
 
         return new_node_for(init, cond, incr, stmt());
 
+    } else if (consume('{')) {
+        node = malloc(sizeof(Node));
+        node->ty = ND_BLOCK;
+        node->block_stmts = new_vector();
+
+        while (!consume('}')) {
+            vec_push(node->block_stmts, (void *)stmt());
+        }
+
+        return node;
     } else {
         node = expr();
     }

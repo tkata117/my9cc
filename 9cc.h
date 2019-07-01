@@ -4,6 +4,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef struct {
+    void **data;
+    int capacity;
+    int len;
+} Vector;
+
 enum {
     TK_NUM = 256,
     TK_IDENT,
@@ -42,6 +48,7 @@ enum {
     ND_IFELSE,
     ND_WHILE,
     ND_FOR,
+    ND_BLOCK,
 };
 
 typedef struct Node {
@@ -53,17 +60,11 @@ typedef struct Node {
     struct Node *incr;
     struct Node *then_stmt;
     struct Node *else_stmt;
+    Vector *block_stmts;
     
     int val;
     int offset;
 } Node;
-
-typedef struct {
-    void **data;
-    int capacity;
-    int len;
-} Vector;
-
 
 typedef struct LVar {
     struct LVar *next;

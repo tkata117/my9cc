@@ -63,6 +63,7 @@ typedef struct LVar {
     int offset;
 } LVar;
 
+// global variables
 extern char *user_input;
 extern Vector *tokens;
 extern int pos;
@@ -70,23 +71,22 @@ extern Node *code[100];
 extern LVar *locals;
 extern int label_cnt;
 
+
+/*** main.c ***/
 void error(char *fmt, ...);
 void error_at(char *loc, char *msg);
 
+
+/*** parse.c ***/
+void tokenize();
 Token *get_token(int idx);
-Vector *new_vector();
-void vec_push(Vector *vec, void *elem);
-
-LVar *find_lvar(Token *tok);
-
 Node *new_node(int ty, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 Node *new_node_lvar(Token *tok);
 Node *new_node_if(Node *cond, Node *then_stmt);
-
 int consume(int ty);
 int is_alnum(char c);
-
+LVar *find_lvar(Token *tok);
 void program();
 Node *stmt();
 Node *expr();
@@ -98,12 +98,13 @@ Node *mul();
 Node *unary();
 Node *term();
 
-void tokenize();
-
+/*** codegen.c ***/
 void gen_lval(Node *node);
 void gen(Node *node);
 
-
+/*** container.c ***/
+Vector *new_vector();
+void vec_push(Vector *vec, void *elem);
 // Test functions
 void expect(int line, int expected, int actual);
 void runtest();

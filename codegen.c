@@ -39,11 +39,28 @@ void gen(Node *node) {
         return;
     case ND_IF:
         gen(node->cond);
-        printf("  mov rax, [rsp]\n");
+        printf("  mov rax, [rsp]\n"); // if条件が成立しないときは、
+                                      // stack pointer を戻してはいけない
+                                      // (mainのgen()呼び出し毎に
+                                      // stackをpopするため、評価結果をstackに
+                                      // 残しておく必要がある) ので、
+                                      // ここではpopしてはいけない
         printf("  cmp rax, 0\n");
         printf("  je .Lend%d\n", label_cnt);
-        printf("  pop rax\n");
+        printf("  pop rax\n"); // if条件が成立したら、then_stmt を処理する前にpop
         gen(node->then_stmt);
+        printf(".Lend%d:\n", label_cnt);
+        label_cnt++;
+        return;
+    case ND_IFELSE:
+        gen(node->cond);
+        printf("  pop rax\n");
+        printf("  cmp rax, 0\n");
+        printf("  je .Lelse%d\n", label_cnt);
+        gen(node->then_stmt);
+        printf("  jmp .Lend%d\n", label_cnt);
+        printf(".Lelse%d:\n", label_cnt);
+        gen(node->else_stmt);
         printf(".Lend%d:\n", label_cnt);
         label_cnt++;
         return;

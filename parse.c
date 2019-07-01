@@ -30,6 +30,15 @@ void tokenize() {
             continue;
         }
 
+        if (strncmp(p, "else", 4) == 0 && !is_alnum(p[4])) {
+            new_token = malloc(sizeof(Token));
+            new_token->ty = TK_ELSE;
+            new_token->input = p;
+            vec_push(tokens, (void *)new_token);
+            p += 4;
+            continue;
+        }
+
         if (strncmp(p, "==", 2) == 0) {
             new_token = malloc(sizeof(Token));
             new_token->ty = TK_EQ;
@@ -189,6 +198,16 @@ Node *new_node_if(Node *cond, Node *then_stmt) {
     return node;
 }
 
+Node *new_node_ifelse(Node *cond, Node *then_stmt, Node *else_stmt) {
+    Node *node = malloc(sizeof(Node));
+    node->ty = ND_IFELSE;
+    node->cond = cond;
+    node->then_stmt = then_stmt;
+    node->else_stmt = else_stmt;
+
+    return node;
+}
+
 int consume(int ty) {
     Token *token = get_token(pos);
     if ( token->ty != ty)
@@ -236,14 +255,20 @@ Node *stmt() {
             error_at(token->input, "'('ではないトークンです");
         }
 
-        Node *expr_node = expr();
+        Node *cond = expr();
 
         if (!consume(')')) {
             Token *token = get_token(pos);
             error_at(token->input, "')'ではないトークンです");
         }
 
-        node = new_node_if(expr_node, stmt());
+        Node *then_stmt = stmt();
+
+        if (consume(TK_ELSE)) {
+            node = new_node_ifelse(cond, then_stmt, stmt());
+        } else {
+            node = new_node_if(cond, then_stmt);
+        }
 
         return node;
     } else {

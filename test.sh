@@ -71,4 +71,8 @@ try 2 "if (1) 2;"
 try 4 "a=1; b=2; if ((a*2)==2) b=b*2; b;"
 try 1 "a=1; if (0) a=a*2; a;"
 
+try 2 "if (1) 2; else 3;"
+try 3 "if (0) 2; else 3;"
+try 3 "a=1; b=2; if ((a*2)==3) b=b*2; else b=a*3;"
+
 echo OK

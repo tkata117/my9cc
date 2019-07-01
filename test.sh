@@ -84,4 +84,13 @@ try 0 "a=0; i=0; for (; i < 0; ) a = a+1; a;"
 try 0 "a=0; i=0; for (; i < 0; i = i+1) a = a+1; a;"
 try 0 "a=0; i=0; for (; i < 0; i = i+1) a = a+1; i;"
 
+try 1 "if (1) if (1) a=1; else a=2; else a=3; a;"
+try 2 "if (1) if (0) a=1; else a=2; else a=3; a;"
+try 3 "if (0) if (0) a=1; else a=2; else a=3; a;"
+
+try 10 "a=0; while (a < 10) while (a < 10) a = a+1; a;"
+
+try 25 "a=0; for (i=0; i < 5; i=i+1) for (j=0; j < 5; j=j+1) a = a+1; a;"
+
+
 echo OK

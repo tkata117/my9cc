@@ -11,6 +11,8 @@ void gen_lval(Node *node) {
 
 void gen(Node *node) {
 
+    int cur_label_cnt;
+
     switch (node->ty) {
     case ND_NUM:
         printf("  push %d\n", node->val);
@@ -38,6 +40,7 @@ void gen(Node *node) {
         printf("  ret\n");
         return;
     case ND_IF:
+        cur_label_cnt = label_cnt++;
         gen(node->cond);
         printf("  mov rax, [rsp]\n"); // if条件が成立しないときは、
                                       // stack pointer を戻してはいけない
@@ -46,48 +49,48 @@ void gen(Node *node) {
                                       // 残しておく必要がある) ので、
                                       // ここではpopしてはいけない
         printf("  cmp rax, 0\n");
-        printf("  je .Lend%d\n", label_cnt);
+        printf("  je .Lend%d\n", cur_label_cnt);
         printf("  pop rax\n"); // 条件が成立したら、then_stmt を処理する前にpop
         gen(node->then_stmt);
-        printf(".Lend%d:\n", label_cnt);
-        label_cnt++;
+        printf(".Lend%d:\n", cur_label_cnt);
         return;
     case ND_IFELSE:
+        cur_label_cnt = label_cnt++;
         gen(node->cond);
         printf("  pop rax\n");
         printf("  cmp rax, 0\n");
-        printf("  je .Lelse%d\n", label_cnt);
+        printf("  je .Lelse%d\n", cur_label_cnt);
         gen(node->then_stmt);
-        printf("  jmp .Lend%d\n", label_cnt);
-        printf(".Lelse%d:\n", label_cnt);
+        printf("  jmp .Lend%d\n", cur_label_cnt);
+        printf(".Lelse%d:\n", cur_label_cnt);
         gen(node->else_stmt);
-        printf(".Lend%d:\n", label_cnt);
-        label_cnt++;
+        printf(".Lend%d:\n", cur_label_cnt);
         return;
     case ND_WHILE:
-        printf(".Lbegin%d:\n", label_cnt);
+        cur_label_cnt = label_cnt++;
+        printf(".Lbegin%d:\n", cur_label_cnt);
         gen(node->cond);
         printf("  mov rax, [rsp]\n"); // ND_IF と同様に、ここでpopしてはいけない
         printf("  cmp rax, 0\n");
-        printf("  je .Lend%d\n", label_cnt);
+        printf("  je .Lend%d\n", cur_label_cnt);
         printf("  pop rax\n"); // 条件が成立したら、then_stmt を処理する前にpop
         gen(node->then_stmt);
-        printf("  jmp .Lbegin%d\n", label_cnt);
-        printf(".Lend%d:\n", label_cnt);
-        label_cnt++;
+        printf("  jmp .Lbegin%d\n", cur_label_cnt);
+        printf(".Lend%d:\n", cur_label_cnt);
         return;
     case ND_FOR:
+        cur_label_cnt = label_cnt++;
         if (node->init) {
             gen(node->init);
             printf("  pop rax\n"); // init処理の評価結果は使用しないのでpop
         }
-        printf(".Lbegin%d:\n", label_cnt);
+        printf(".Lbegin%d:\n", cur_label_cnt);
         if (node->cond) {
             gen(node->cond);
             printf("  mov rax, [rsp]\n"); // ND_IF と同様に、
                                           // ここでpopしてはいけない
             printf("  cmp rax, 0\n");
-            printf("  je .Lend%d\n", label_cnt);
+            printf("  je .Lend%d\n", cur_label_cnt);
             printf("  pop rax\n"); // 条件が成立したら、then_stmt を処理する前にpop
         }
         gen(node->then_stmt);
@@ -95,9 +98,8 @@ void gen(Node *node) {
             printf("  pop rax\n"); // then_stmt処理の評価結果は使用しないのでpop
             gen(node->incr);
         }
-        printf("  jmp .Lbegin%d\n", label_cnt);
-        printf(".Lend%d:\n", label_cnt);
-        label_cnt++;
+        printf("  jmp .Lbegin%d\n", cur_label_cnt);
+        printf(".Lend%d:\n", cur_label_cnt);
         return;
     }
 

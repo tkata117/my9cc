@@ -47,7 +47,7 @@ void gen(Node *node) {
                                       // ここではpopしてはいけない
         printf("  cmp rax, 0\n");
         printf("  je .Lend%d\n", label_cnt);
-        printf("  pop rax\n"); // if条件が成立したら、then_stmt を処理する前にpop
+        printf("  pop rax\n"); // 条件が成立したら、then_stmt を処理する前にpop
         gen(node->then_stmt);
         printf(".Lend%d:\n", label_cnt);
         label_cnt++;
@@ -61,6 +61,18 @@ void gen(Node *node) {
         printf("  jmp .Lend%d\n", label_cnt);
         printf(".Lelse%d:\n", label_cnt);
         gen(node->else_stmt);
+        printf(".Lend%d:\n", label_cnt);
+        label_cnt++;
+        return;
+    case ND_WHILE:
+        printf(".Lbegin%d:\n", label_cnt);
+        gen(node->cond);
+        printf("  mov rax, [rsp]\n"); // ND_IF と同様に、ここでpopしてはいけない
+        printf("  cmp rax, 0\n");
+        printf("  je .Lend%d\n", label_cnt);
+        printf("  pop rax\n"); // 条件が成立したら、then_stmt を処理する前にpop
+        gen(node->then_stmt);
+        printf("  jmp .Lbegin%d\n", label_cnt);
         printf(".Lend%d:\n", label_cnt);
         label_cnt++;
         return;

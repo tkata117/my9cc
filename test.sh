@@ -78,4 +78,10 @@ try 3 "a=1; b=2; if ((a*2)==3) b=b*2; else b=a*3;"
 try 0 "a=0; while (a < 0) a=a+1; a;"
 try 5 "a=0; while (a < 5) a=a+1; a;"
 
+try 5 "a=0; for (i=0; i < 5; i = i+1) a = a+1; a;"
+try 5 "a=0; i=0; for (; i < 5; i = i+1) a = a+1; a;"
+try 0 "a=0; i=0; for (; i < 0; ) a = a+1; a;"
+try 0 "a=0; i=0; for (; i < 0; i = i+1) a = a+1; a;"
+try 0 "a=0; i=0; for (; i < 0; i = i+1) a = a+1; i;"
+
 echo OK

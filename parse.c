@@ -48,6 +48,15 @@ void tokenize() {
             continue;
         }
 
+        if (strncmp(p, "for", 3) == 0 && !is_alnum(p[3])) {
+            new_token = malloc(sizeof(Token));
+            new_token->ty = TK_FOR;
+            new_token->input = p;
+            vec_push(tokens, (void *)new_token);
+            p += 3;
+            continue;
+        }
+
         if (strncmp(p, "==", 2) == 0) {
             new_token = malloc(sizeof(Token));
             new_token->ty = TK_EQ;
@@ -226,6 +235,17 @@ Node *new_node_while(Node *cond, Node *then_stmt) {
     return node;
 }
 
+Node *new_node_for(Node *init, Node *cond, Node *incr, Node *then_stmt) {
+    Node *node = malloc(sizeof(Node));
+    node->ty = ND_FOR;
+    node->init = init;
+    node->cond = cond;
+    node->incr = incr;
+    node->then_stmt = then_stmt;
+
+    return node;
+}
+
 int consume(int ty) {
     Token *token = get_token(pos);
     if ( token->ty != ty)
@@ -303,6 +323,41 @@ Node *stmt() {
         }
 
         return new_node_while(cond, stmt());
+    } else if (consume(TK_FOR)) {
+        if (!consume('(')) {
+            Token *token = get_token(pos);
+            error_at(token->input, "'('ではないトークンです");
+        }
+
+        Node *init = NULL;
+        if (!consume(';')) {
+            init = expr();
+            if (!consume(';')) {
+                Token *token = get_token(pos);
+                error_at(token->input, "';'ではないトークンです");
+            }
+        }
+
+        Node *cond = NULL;
+        if (!consume(';')) {
+            cond = expr();
+            if (!consume(';')) {
+                Token *token = get_token(pos);
+                error_at(token->input, "';'ではないトークンです");
+            }
+        }
+
+        Node *incr = NULL;
+        if (!consume(')')) {
+            incr = expr();
+            if (!consume(')')) {
+                Token *token = get_token(pos);
+                error_at(token->input, "')'ではないトークンです");
+            }
+        }
+
+        return new_node_for(init, cond, incr, stmt());
+
     } else {
         node = expr();
     }

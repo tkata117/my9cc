@@ -76,6 +76,29 @@ void gen(Node *node) {
         printf(".Lend%d:\n", label_cnt);
         label_cnt++;
         return;
+    case ND_FOR:
+        if (node->init) {
+            gen(node->init);
+            printf("  pop rax\n"); // init処理の評価結果は使用しないのでpop
+        }
+        printf(".Lbegin%d:\n", label_cnt);
+        if (node->cond) {
+            gen(node->cond);
+            printf("  mov rax, [rsp]\n"); // ND_IF と同様に、
+                                          // ここでpopしてはいけない
+            printf("  cmp rax, 0\n");
+            printf("  je .Lend%d\n", label_cnt);
+            printf("  pop rax\n"); // 条件が成立したら、then_stmt を処理する前にpop
+        }
+        gen(node->then_stmt);
+        if (node->incr) {
+            printf("  pop rax\n"); // then_stmt処理の評価結果は使用しないのでpop
+            gen(node->incr);
+        }
+        printf("  jmp .Lbegin%d\n", label_cnt);
+        printf(".Lend%d:\n", label_cnt);
+        label_cnt++;
+        return;
     }
 
     gen(node->lhs);

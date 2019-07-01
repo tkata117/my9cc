@@ -17,6 +17,7 @@ enum {
     TK_IF,
     TK_ELSE,
     TK_WHILE,
+    TK_FOR,
     TK_EOF,
 };
 
@@ -40,13 +41,16 @@ enum {
     ND_IF,
     ND_IFELSE,
     ND_WHILE,
+    ND_FOR,
 };
 
 typedef struct Node {
     int ty;
     struct Node *lhs;
     struct Node *rhs;
+    struct Node *init;
     struct Node *cond;
+    struct Node *incr;
     struct Node *then_stmt;
     struct Node *else_stmt;
     
@@ -91,6 +95,7 @@ Node *new_node_lvar(Token *tok);
 Node *new_node_if(Node *cond, Node *then_stmt);
 Node *new_node_ifelse(Node *cond, Node *then_stmt, Node *else_stmt);
 Node *new_node_while(Node *cond, Node *then_stmt);
+Node *new_node_for(Node *init, Node *cond, Node *incr, Node *then_stmt);
 int consume(int ty);
 int is_alnum(char c);
 LVar *find_lvar(Token *tok);

@@ -468,13 +468,11 @@ Node *term() {
         return node;
     }
 
-    if (token->ty == TK_NUM) {
-        pos++;
+    if (consume(TK_NUM)) {
         return new_node_num(token->val);
     }
 
-    if (token->ty == TK_IDENT) {
-        pos++;
+    if (consume(TK_IDENT)) {
         return new_node_lvar(token);
     }
 

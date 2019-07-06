@@ -1,10 +1,10 @@
 #include <stdio.h>
 
-void foo() {
+void testprint() {
     printf("Function Call Success\n");
 }
-int bar() { return 10; }
-int baz(int x, int y) { return x + y; }
+int testret() { return 10; }
+int testsum(int x, int y) { return x + y; }
 
 int testrsp () {
     // RSP が 16の倍数なら 0, 倍数以外なら 1 を返す テスト関数

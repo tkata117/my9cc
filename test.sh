@@ -125,16 +125,16 @@ try 3 "a=1; {a=a+1; a=a+1;} a;"
 # ステップ14: 関数呼び出し
 
 ## 引数なしの関数呼び出し
-try 1 "foo(); 1;"
-try 1 "a=1; foo(); a;"
-try 10 "bar();"
-try 10 "a=1; bar();"
+try 1 "testprint(); 1;"
+try 1 "a=1; testprint(); a;"
+try 10 "testret();"
+try 10 "a=1; testret();"
 
 ## 引数ありの関数呼び出し
-try 3 "baz(1, 2);"
-try 3 "a=1; baz(1, 2);"
-try 11 "a=1; baz(1*3, 2*4);"
-try 3 "a=1; b=baz(1, 2); b;"
+try 3 "testsum(1, 2);"
+try 3 "a=1; testsum(1, 2);"
+try 11 "a=1; testsum(1*3, 2*4);"
+try 3 "a=1; b=testsum(1, 2); b;"
 
 ## 関数呼び出しをする前にRSPが16の倍数となっていることをテスト
 ##   testrsp() は RSPが16の倍数なら0, 倍数以外なら1を返す

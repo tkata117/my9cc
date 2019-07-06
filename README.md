@@ -31,6 +31,6 @@ add        = mul ("+" mul | "-" mul)*
 mul        = unary ("*" unary | "/" unary)*
 unary      = ("+" | "-")? term
 term       = num
-           | ident ("(" ")")?
+           | ident ("(" (ident ("," ident)*)? ")")?
            | "(" expr ")"
 ```

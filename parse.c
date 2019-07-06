@@ -97,7 +97,8 @@ void tokenize() {
             *p == '*' || *p == '/' ||
             *p == '(' || *p == ')' ||
             *p == '{' || *p == '}' ||
-            *p == '=' || *p == ';' ) {
+            *p == '=' || *p == ';' ||
+            *p == ',') {
             new_token = malloc(sizeof(Token));
             new_token->ty = *p;
             new_token->input = p;
@@ -247,11 +248,12 @@ Node *new_node_for(Node *init, Node *cond, Node *incr, Node *then_stmt) {
     return node;
 }
 
-Node *new_node_func_call(Token *tok) {
+Node *new_node_func_call(Token *tok, Vector *args) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_FUNC_CALL;
     node->name = tok->input;
     node->len = tok->len;
+    node->args = args;
     
     return node;
 }
@@ -483,14 +485,22 @@ Node *term() {
         return new_node_num(token->val);
     }
 
-    if (consume(TK_IDENT)) {
+    if (consume(TK_IDENT)) {        
         if (consume('(')) { // 関数呼び出し
-            if (!consume(')')) {
-                token = get_token(pos);
-                error_at( token->input,
-                          "開きカッコに対応する閉じカッコがありません");
+            Vector *args = new_vector();
+            for (;;) {
+                if (!consume(')')) {
+                    if (args->len > 0) {
+                        if (!consume(',')) {
+                            token = get_token(pos);
+                            error_at( token->input, "',' または ')' がありません");
+                        }
+                    }
+                    vec_push(args, (void *)expr());
+                } else {
+                    return new_node_func_call(token, args);
+                }
             }
-            return new_node_func_call(token);
         } else { // 変数
             return new_node_lvar(token);
         }

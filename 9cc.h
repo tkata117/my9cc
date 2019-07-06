@@ -71,6 +71,7 @@ typedef struct Node {
     // for function call
     char *name;
     int len;
+    Vector *args;
 } Node;
 
 typedef struct LVar {
@@ -104,7 +105,7 @@ Node *new_node_if(Node *cond, Node *then_stmt);
 Node *new_node_ifelse(Node *cond, Node *then_stmt, Node *else_stmt);
 Node *new_node_while(Node *cond, Node *then_stmt);
 Node *new_node_for(Node *init, Node *cond, Node *incr, Node *then_stmt);
-Node *new_node_func_call(Token *tok);
+Node *new_node_func_call(Token *tok, Vector *args);
 int consume(int ty);
 int is_alnum(char c);
 LVar *find_lvar(Token *tok);

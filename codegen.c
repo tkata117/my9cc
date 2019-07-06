@@ -1,5 +1,7 @@
 #include "9cc.h"
 
+static char *argregs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+
 void gen_lval(Node *node) {
     if (node->ty != ND_LVAR)
         error("代入の左辺値が変数ではありません");
@@ -13,6 +15,7 @@ void gen(Node *node) {
 
     int cur_label_cnt;
     Vector *block_stmts;
+    Vector *args;
 
     switch (node->ty) {
     case ND_NUM:
@@ -115,6 +118,13 @@ void gen(Node *node) {
         }
         return;
     case ND_FUNC_CALL:
+        args = node->args;
+        for (int i = 0; i < args->len; i++) {
+            gen(args->data[i]);
+        }
+        for (int i = args->len; i > 0; i--) {
+            printf("  pop %s\n", argregs[i-1]);
+        }
         printf("  call %.*s\n", node->len, node->name);
         printf("  push rax\n"); // 関数の返り値を stack に push
                                 // (Statementの処理結果はstackに入れる方針)

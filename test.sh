@@ -130,4 +130,10 @@ try 1 "a=1; foo(); a;"
 try 10 "bar();"
 try 10 "a=1; bar();"
 
+## 引数ありの関数呼び出し
+try 3 "baz(1, 2);"
+try 3 "a=1; baz(1, 2);"
+try 11 "a=1; baz(1*3, 2*4);"
+try 3 "a=1; b=baz(1, 2); b;"
+
 echo OK

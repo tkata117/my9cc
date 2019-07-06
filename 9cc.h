@@ -10,6 +10,13 @@ typedef struct {
     int len;
 } Vector;
 
+typedef struct LVar {
+    struct LVar *next;
+    char *name;
+    int len;
+    int offset;
+} LVar;
+
 enum {
     TK_NUM = 256,
     TK_IDENT,
@@ -50,6 +57,7 @@ enum {
     ND_FOR,
     ND_BLOCK,
     ND_FUNC_CALL,
+    ND_FUNC_DECLARE
 };
 
 typedef struct Node {
@@ -61,12 +69,15 @@ typedef struct Node {
     struct Node *incr;
     struct Node *then_stmt;
     struct Node *else_stmt;
-    Vector *block_stmts;   
+    Vector *block_stmts;
 
     int val;
 
     // for variable
     int offset;
+
+    // for function declare
+    int func_num;
 
     // for function call
     char *name;
@@ -74,20 +85,14 @@ typedef struct Node {
     Vector *args;
 } Node;
 
-typedef struct LVar {
-    struct LVar *next;
-    char *name;
-    int len;
-    int offset;
-} LVar;
-
 // global variables
 extern char *user_input;
 extern Vector *tokens;
 extern int pos;
 extern Node *code[100];
-extern LVar *locals;
 extern int label_cnt;
+extern int func_cnt;
+extern Vector *locals;
 
 
 /*** main.c ***/
@@ -106,10 +111,12 @@ Node *new_node_ifelse(Node *cond, Node *then_stmt, Node *else_stmt);
 Node *new_node_while(Node *cond, Node *then_stmt);
 Node *new_node_for(Node *init, Node *cond, Node *incr, Node *then_stmt);
 Node *new_node_func_call(Token *tok, Vector *args);
+Node *new_node_func_declare(Token *tok);
 int consume(int ty);
 int is_alnum(char c);
-LVar *find_lvar(Token *tok);
+LVar *find_lvar(LVar *lvars, Token *tok);
 void program();
+Node *func();
 Node *stmt();
 Node *expr();
 Node *assign();

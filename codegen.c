@@ -16,6 +16,7 @@ void gen(Node *node) {
     int cur_label_cnt;
     Vector *block_stmts;
     Vector *args;
+    LVar *func_local;
 
     switch (node->ty) {
     case ND_NUM:
@@ -147,6 +148,32 @@ void gen(Node *node) {
         // 関数の返り値を stack に push
         // (Statementの処理結果はstackに入れる方針)        
         printf("  push rax\n"); 
+        return;
+    case ND_FUNC_DECLARE:
+        block_stmts = node->block_stmts;
+        func_local = locals->data[node->func_num];
+
+        printf("%.*s:\n", node->len, node->name);
+
+        // プロローグ
+        printf("  push rbp\n");
+        printf("  mov rbp, rsp\n");
+        if (func_local)
+            printf("  sub rsp, %d\n", func_local->offset);
+
+        for (int i = 0; i < block_stmts->len; i++) {          
+            gen((Node *)block_stmts->data[i]);
+
+            // 各ステートメントは1つの値をスタックに残すので、毎回popする
+            printf("  pop rax\n");
+        }
+
+        // エピローグ
+        if (func_local)
+            printf("  add rsp, %d\n", func_local->offset);
+        printf("  mov rsp, rbp\n");
+        printf("  pop rbp\n");
+        printf("  ret\n");
         return;
     }
 

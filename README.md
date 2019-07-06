@@ -16,7 +16,8 @@ $ make test
 ## 文法
 
 ```
-program    = stmt*
+program    = func*
+func       = ident "(" ")" "{" stmt* "}";
 stmt       = expr ";"
            | "{" stmt* "}"
            | "if" "(" expr ")" stmt ("else" stmt)?

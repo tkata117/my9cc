@@ -188,22 +188,23 @@ Node *new_node_num(int val) {
 Node *new_node_lvar(Token *tok) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_LVAR;
-
-    LVar *lvar = find_lvar(tok);
+    
+    LVar *func_local = locals->data[func_cnt-1];
+    LVar *lvar = find_lvar(func_local, tok);
     if (lvar) {
         node->offset = lvar->offset;
     } else {
         lvar = malloc(sizeof(LVar));
-        lvar->next = locals;
+        lvar->next = func_local;
         lvar->name = tok->input;
         lvar->len = tok->len;
-        if (locals) {
-            lvar->offset = locals->offset + 8;
+        if (func_local) {
+            lvar->offset = func_local->offset + 8;
         } else {
             lvar->offset = 8;
         }
         node->offset = lvar->offset;
-        locals = lvar;
+        locals->data[func_cnt-1] = lvar;
     }
 
     return node;
@@ -258,6 +259,17 @@ Node *new_node_func_call(Token *tok, Vector *args) {
     return node;
 }
 
+Node *new_node_func_declare(Token *tok) {
+    Node *node = malloc(sizeof(Node));
+    node->ty = ND_FUNC_DECLARE;
+    node->name = tok->input;
+    node->len = tok->len;
+    node->block_stmts = new_vector();
+    node->func_num = func_cnt++;
+    
+    return node;
+}
+
 int consume(int ty) {
     Token *token = get_token(pos);
     if ( token->ty != ty)
@@ -273,8 +285,8 @@ int is_alnum(char c) {
              (c == '_') );
 }
 
-LVar *find_lvar(Token *tok) {
-    for (LVar *var = locals; var; var = var->next) {
+LVar *find_lvar(LVar *lvars, Token *tok) {
+    for (LVar *var = lvars; var; var = var->next) {
         if ( (var->len == tok->len) &&
              (memcmp(tok->input, var->name, var->len) == 0) ) {
             return var;
@@ -287,11 +299,47 @@ LVar *find_lvar(Token *tok) {
 void program() {
     int i = 0;
     Token *token = get_token(pos);
+
+    locals = new_vector();
     while (token->ty != TK_EOF) {
-        code[i++] = stmt();
+        code[i++] = func();
         token = get_token(pos);
     }
     code[i] = NULL;
+}
+
+Node *func() {
+    Token *token = get_token(pos);
+    Node *node;
+
+    if (consume(TK_IDENT)) {
+
+        if (!consume('(')) {
+            token = get_token(pos);
+            error_at(token->input, "'('ではないトークンです");
+        }
+
+        if (!consume(')')) {
+            token = get_token(pos);
+            error_at(token->input, "')'ではないトークンです");
+        }
+
+        if (!consume('{')) {
+            token = get_token(pos);
+            error_at(token->input, "'{'ではないトークンです");
+        }
+
+        node = new_node_func_declare(token);
+        vec_push(locals, NULL);
+
+        while (!consume('}')) {
+            vec_push(node->block_stmts, (void *)stmt());
+        }
+
+        return node;
+    } else {
+        error_at(token->input, "関数名ではないトークンです");
+    }
 }
 
 Node *stmt() {

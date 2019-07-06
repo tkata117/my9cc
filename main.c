@@ -4,8 +4,9 @@ char *user_input;
 Vector *tokens;
 int pos = 0;
 Node *code[100];
-LVar *locals = NULL;
 int label_cnt = 0;
+int func_cnt = 0;
+Vector *locals;
 
 void error(char *fmt, ...) {
     va_list ap;
@@ -33,7 +34,7 @@ int main(int argc, char *argv[]) {
         runtest();
         return 0;
     }
-
+   
     // tokenize and parse
     user_input = argv[1];
     tokenize();
@@ -42,26 +43,11 @@ int main(int argc, char *argv[]) {
     // print the first part of assembly code
     printf(".intel_syntax noprefix\n");
     printf(".global main\n");
-    printf("main:\n");
-
-    // プロローグ
-    printf("  push rbp\n");
-    printf("  mov rbp, rsp\n");
-    if (locals)
-        printf("  sub rsp, %d\n", locals->offset);
 
     // gen code
     for (int i = 0; code[i]; i++) {
         gen(code[i]);
-
-        printf("  pop rax\n");
     }
 
-    // エピローグ
-    if (locals)
-        printf("  add rsp, %d\n", locals->offset);
-    printf("  mov rsp, rbp\n");
-    printf("  pop rbp\n");
-    printf("  ret\n");
     return 0;
 }

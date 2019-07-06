@@ -114,6 +114,11 @@ void gen(Node *node) {
             }
         }
         return;
+    case ND_FUNC_CALL:
+        printf("  call %.*s\n", node->len, node->name);
+        printf("  push rax\n"); // 関数の返り値を stack に push
+                                // (Statementの処理結果はstackに入れる方針)
+        return;
     }
 
     gen(node->lhs);

@@ -247,6 +247,15 @@ Node *new_node_for(Node *init, Node *cond, Node *incr, Node *then_stmt) {
     return node;
 }
 
+Node *new_node_func_call(Token *tok) {
+    Node *node = malloc(sizeof(Node));
+    node->ty = ND_FUNC_CALL;
+    node->name = tok->input;
+    node->len = tok->len;
+    
+    return node;
+}
+
 int consume(int ty) {
     Token *token = get_token(pos);
     if ( token->ty != ty)
@@ -462,9 +471,11 @@ Node *term() {
 
     if (consume('(')) {
         Node *node = expr();
-        if (!consume(')'))
+        if (!consume(')')) {
+            token = get_token(pos);
             error_at( token->input,
                      "開きカッコに対応する閉じカッコがありません");
+        }
         return node;
     }
 
@@ -473,9 +484,17 @@ Node *term() {
     }
 
     if (consume(TK_IDENT)) {
-        return new_node_lvar(token);
+        if (consume('(')) { // 関数呼び出し
+            if (!consume(')')) {
+                token = get_token(pos);
+                error_at( token->input,
+                          "開きカッコに対応する閉じカッコがありません");
+            }
+            return new_node_func_call(token);
+        } else { // 変数
+            return new_node_lvar(token);
+        }
     }
-
 
     error_at(token->input,
              "数値 or 変数 ではないトークンです");

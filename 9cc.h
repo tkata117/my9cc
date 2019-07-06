@@ -49,6 +49,7 @@ enum {
     ND_WHILE,
     ND_FOR,
     ND_BLOCK,
+    ND_FUNC_CALL,
 };
 
 typedef struct Node {
@@ -60,10 +61,16 @@ typedef struct Node {
     struct Node *incr;
     struct Node *then_stmt;
     struct Node *else_stmt;
-    Vector *block_stmts;
-    
+    Vector *block_stmts;   
+
     int val;
+
+    // for variable
     int offset;
+
+    // for function call
+    char *name;
+    int len;
 } Node;
 
 typedef struct LVar {
@@ -97,6 +104,7 @@ Node *new_node_if(Node *cond, Node *then_stmt);
 Node *new_node_ifelse(Node *cond, Node *then_stmt, Node *else_stmt);
 Node *new_node_while(Node *cond, Node *then_stmt);
 Node *new_node_for(Node *init, Node *cond, Node *incr, Node *then_stmt);
+Node *new_node_func_call(Token *tok);
 int consume(int ty);
 int is_alnum(char c);
 LVar *find_lvar(Token *tok);

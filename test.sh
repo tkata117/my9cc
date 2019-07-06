@@ -5,7 +5,7 @@ try() {
     input="$2"
 
     ./9cc "$input" > tmp.s
-    gcc -o tmp tmp.s
+    gcc -o tmp tmp.s test/test_func_call.o
     ./tmp
     actual="$?"
 
@@ -121,5 +121,13 @@ try 25 "a=0; for (i=0; i < 5; i=i+1) for (j=0; j < 5; j=j+1) a = a+1; a;"
 try 1 "{} 1;"
 try 2 "a=1; {a=a+1;} a;"
 try 3 "a=1; {a=a+1; a=a+1;} a;"
+
+# ステップ14: 関数呼び出し
+
+## 引数なしの関数呼び出し
+try 1 "foo(); 1;"
+try 1 "a=1; foo(); a;"
+try 10 "bar();"
+try 10 "a=1; bar();"
 
 echo OK

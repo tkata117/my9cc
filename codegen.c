@@ -125,9 +125,28 @@ void gen(Node *node) {
         for (int i = args->len; i > 0; i--) {
             printf("  pop %s\n", argregs[i-1]);
         }
+
+        // x64のABIでは、RSP を 16Byte の倍数にしてから 関数を呼び出す必要がある
+        //   16Byteにそろえるために引いた値を Stack に積んでおく
+        //   (1push分(8Byte)を加味して引き算の量を決定する)
+        printf("  mov rbx, rsp\n"); // rbx = rsp
+        printf("  sub rbx, 8\n");   // rbx = rsp - 8(1push分)
+        printf("  and rbx, 0xf\n"); // rbx = 1push分を加味した後の 16Byteアラインからのずれ
+        printf("  sub rsp, rbx\n"); 
+        printf("  push rbx\n"); // 16Byte アラインとするために引いた値
+
+        printf("  mov rcx, 8\n");
+        printf("  add rcx, rbx\n"); // push分 + 16Byteアラインからずれている量
+
         printf("  call %.*s\n", node->len, node->name);
-        printf("  push rax\n"); // 関数の返り値を stack に push
-                                // (Statementの処理結果はstackに入れる方針)
+
+        // RSP を16Byteにそろえるために引いた値を RSPに足して、関数呼び出し前の RSP に戻す
+        printf("  pop rbx\n"); // 16Byte アラインとするために引いた値
+        printf("  add rsp, rbx\n"); 
+
+        // 関数の返り値を stack に push
+        // (Statementの処理結果はstackに入れる方針)        
+        printf("  push rax\n"); 
         return;
     }
 

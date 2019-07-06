@@ -136,4 +136,10 @@ try 3 "a=1; baz(1, 2);"
 try 11 "a=1; baz(1*3, 2*4);"
 try 3 "a=1; b=baz(1, 2); b;"
 
+## 関数呼び出しをする前にRSPが16の倍数となっていることをテスト
+##   testrsp() は RSPが16の倍数なら0, 倍数以外なら1を返す
+try 0 "testrsp();"
+try 0 "a=2; testrsp();"
+try 2 "a=2; testrsp(); a;"
+
 echo OK

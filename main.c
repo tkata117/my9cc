@@ -58,6 +58,8 @@ int main(int argc, char *argv[]) {
     }
 
     // エピローグ
+    if (locals)
+        printf("  add rsp, %d\n", locals->offset);
     printf("  mov rsp, rbp\n");
     printf("  pop rbp\n");
     printf("  ret\n");

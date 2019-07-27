@@ -94,12 +94,6 @@ extern int label_cnt;
 extern int func_cnt;
 extern Vector *locals;
 
-
-/*** main.c ***/
-void error(char *fmt, ...);
-void error_at(char *loc, char *msg);
-
-
 /*** parse.c ***/
 void tokenize();
 Token *get_token(int idx);
@@ -134,6 +128,12 @@ void gen(Node *node);
 /*** container.c ***/
 Vector *new_vector();
 void vec_push(Vector *vec, void *elem);
-// Test functions
+
+/*** util.c ***/
+void error(char *fmt, ...);
+void error_at(char *loc, char *msg);
+
+
+/*** test.c ***/
 void expect(int line, int expected, int actual);
 void runtest();

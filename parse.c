@@ -129,15 +129,14 @@ LVar *find_lvar(LVar *lvars, Token *tok) {
 
 
 void program() {
-    int i = 0;
     Token *token = get_token(pos);
 
     locals = new_vector();
+    code = new_vector();
     while (token->ty != TK_EOF) {
-        code[i++] = func();
+        vec_push(code, (void *)func());
         token = get_token(pos);
     }
-    code[i] = NULL;
 }
 
 Node *func() {

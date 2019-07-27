@@ -89,7 +89,7 @@ typedef struct Node {
 extern char *user_input;
 extern Vector *tokens;
 extern int pos;
-extern Node *code[100];
+extern Vector *code;
 extern int label_cnt;
 extern int func_cnt;
 extern Vector *locals;

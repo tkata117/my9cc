@@ -3,7 +3,7 @@
 char *user_input;
 Vector *tokens;
 int pos = 0;
-Node *code[100];
+Vector *code;
 int label_cnt = 0;
 int func_cnt = 0;
 Vector *locals;
@@ -29,8 +29,8 @@ int main(int argc, char *argv[]) {
     printf(".global main\n");
 
     // gen code
-    for (int i = 0; code[i]; i++) {
-        gen(code[i]);
+    for (int i = 0; i < code->len; i++) {
+        gen(code->data[i]);
     }
 
     return 0;

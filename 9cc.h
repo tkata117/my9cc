@@ -97,10 +97,10 @@ extern Vector *locals;
 /*** tokenize.c ***/
 int is_alnum(char c);
 int is_alnumus(char c);
+Token *new_token(int ty, int val, char *input, int len);
 void tokenize();
 
 /*** parse.c ***/
-
 Token *get_token(int idx);
 Node *new_node(int ty, Node *lhs, Node *rhs);
 Node *new_node_num(int val);

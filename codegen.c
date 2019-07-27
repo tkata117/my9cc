@@ -120,11 +120,13 @@ void gen(Node *node) {
         return;
     case ND_FUNC_CALL:
         args = node->args;
-        for (int i = 0; i < args->len; i++) {
-            gen(args->data[i]);
-        }
-        for (int i = args->len; i > 0; i--) {
-            printf("  pop %s\n", argregs[i-1]);
+        if (args) {
+            for (int i = 0; i < args->len; i++) {
+                gen(args->data[i]);
+            }
+            for (int i = args->len; i > 0; i--) {
+                printf("  pop %s\n", argregs[i-1]);
+            }
         }
 
         // x64のABIでは、RSP を 16Byte の倍数にしてから 関数を呼び出す必要がある

@@ -366,20 +366,18 @@ Node *term() {
 
     if (consume(TK_IDENT)) {        
         if (consume('(')) { // 関数呼び出し
-            Vector *args = new_vector();
-            for (;;) {
+
+            Vector *args = NULL;
+            if (!consume(')')) {
+                args = argument();
                 if (!consume(')')) {
-                    if (args->len > 0) {
-                        if (!consume(',')) {
-                            token = get_token(pos);
-                            error_at( token->input, "',' または ')' がありません");
-                        }
-                    }
-                    vec_push(args, (void *)expr());
-                } else {
-                    return new_node_func_call(token, args);
+                    token = get_token(pos);
+                    error_at( token->input, "')' がありません");
                 }
             }
+
+            return new_node_func_call(token, args);
+
         } else { // 変数
             return new_node_lvar(token);
         }
@@ -388,4 +386,16 @@ Node *term() {
     error_at(token->input,
              "数値 or 変数 ではないトークンです");
     return NULL;
+}
+
+Vector *argument() {
+    Vector *args = new_vector();
+    for (;;) {
+        if (args->len > 0) {
+            if (!consume(',')) {
+                return args;
+            }
+        }
+        vec_push(args, (void *)expr());
+    }
 }

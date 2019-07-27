@@ -142,7 +142,7 @@ void tokenize() {
             new_token->ty = TK_IDENT;
             new_token->input = p;
 
-            while ('a' <= *p && *p <= 'z') {
+            while (is_alnum(*p)) {
                 p++;
                 len++;
             }

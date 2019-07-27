@@ -76,6 +76,9 @@ try 18 "main() {b=2; z=(4+b)*3;}"
 try 10 "main() {foo=2; bar=4+foo*3;}"
 try 18 "main() {foo=2; hoge=(4+foo)*3;}"
 
+## ローカル変数に'_'を使えるように修正
+try 10 "main() {foo_a=2; bar_=4+foo_a*3;}"
+
 # ステップ11: return文
 try 14 "main() {a=3; b = 5 * 6 -8; return a + b / 2;}"
 try 5  "main() {return 5; return 8;}"

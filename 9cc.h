@@ -94,8 +94,12 @@ extern int label_cnt;
 extern int func_cnt;
 extern Vector *locals;
 
-/*** parse.c ***/
+/*** tokenize.c ***/
+int is_alnum(char c);
 void tokenize();
+
+/*** parse.c ***/
+
 Token *get_token(int idx);
 Node *new_node(int ty, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
@@ -107,7 +111,6 @@ Node *new_node_for(Node *init, Node *cond, Node *incr, Node *then_stmt);
 Node *new_node_func_call(Token *tok, Vector *args);
 Node *new_node_func_declare(Token *tok);
 int consume(int ty);
-int is_alnum(char c);
 LVar *find_lvar(LVar *lvars, Token *tok);
 void program();
 Node *func();

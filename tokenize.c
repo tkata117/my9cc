@@ -1,10 +1,11 @@
 #include "9cc.h"
 
 int is_alnum(char c) {
-    return ( ('a' <= c && c <= 'z') ||
-             ('A' <= c && c <= 'Z') ||
-             ('0' <= c && c <= '9') ||
-             (c == '_') );
+    return ( isalpha(c) || ('0' <= c && c <= '9') );
+}
+
+int is_alnumus(char c) {
+    return ( is_alnum(c) || (c == '_') );
 }
 
 void tokenize() {
@@ -142,14 +143,14 @@ void tokenize() {
             continue;
         }
 
-        if ('a' <= *p && *p <= 'z') {
+        if (isalpha(*p)) {
             int len = 0;
 
             new_token = malloc(sizeof(Token));
             new_token->ty = TK_IDENT;
             new_token->input = p;
 
-            while (is_alnum(*p)) {
+            while (is_alnumus(*p)) {
                 p++;
                 len++;
             }

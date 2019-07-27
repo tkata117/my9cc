@@ -96,6 +96,7 @@ extern Vector *locals;
 
 /*** tokenize.c ***/
 int is_alnum(char c);
+int is_alnumus(char c);
 void tokenize();
 
 /*** parse.c ***/

@@ -150,4 +150,10 @@ try 2 "main() {a=2; testrsp(); a;}"
 ## 引数なしの関数定義
 try 4 "hoge() { a=2; return 1; } main() { a=3; b=hoge(); return a+b; }"
 
+## 引数ありの関数定義
+try 2 "hoge(a) { return a+1; } main() { return hoge(1); }"
+try 3 "hoge(a) { a = a + 1; return a; } main() { a=1; b=hoge(a); return a+b; }"
+try 3 "sum(a, b) { c = a + b; return c; } main() { return sum(1, 2); }"
+try 10 "sum(a, b) { c = a + b; return c; } main() { a = sum(1, 2); b = sum(3, 4); return a+b; }"
+
 echo OK

@@ -78,6 +78,7 @@ typedef struct Node {
 
     // for function declare
     int func_num;
+    Vector *params;
 
     // for function call
     char *name;
@@ -110,7 +111,7 @@ Node *new_node_ifelse(Node *cond, Node *then_stmt, Node *else_stmt);
 Node *new_node_while(Node *cond, Node *then_stmt);
 Node *new_node_for(Node *init, Node *cond, Node *incr, Node *then_stmt);
 Node *new_node_func_call(Token *tok, Vector *args);
-Node *new_node_func_declare(Token *tok);
+Node *new_node_func_declare(Token *tok, Vector *block_stmts, Vector *params);
 int consume(int ty);
 LVar *find_lvar(LVar *lvars, Token *tok);
 void program();
@@ -125,6 +126,7 @@ Node *mul();
 Node *unary();
 Node *term();
 Vector *argument();
+Vector *parameter();
 
 /*** codegen.c ***/
 void gen_lval(Node *node);

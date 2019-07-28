@@ -54,7 +54,7 @@ $ make test
 
 ```
 program    = func*
-func       = ident "(" argument? ")" "{" stmt* "}";
+func       = ident "(" parameter? ")" "{" stmt* "}";
 stmt       = expr ";"
            | "{" stmt* "}"
            | "if" "(" expr ")" stmt ("else" stmt)?
@@ -72,4 +72,5 @@ term       = num
            | ident ("(" arguments? ")")?
            | "(" expr ")"
 argument   = expr ("," expr)*
+parameter  = ident ("," ident)*
 ```

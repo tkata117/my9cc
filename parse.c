@@ -27,7 +27,7 @@ Node *new_node_lvar(Token *tok) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_LVAR;
     
-    LVar *func_local = locals->data[func_cnt-1];
+    LVar *func_local = locals->data[func_cnt];
     LVar *lvar = find_lvar(func_local, tok);
     if (lvar) {
         node->offset = lvar->offset;
@@ -42,7 +42,7 @@ Node *new_node_lvar(Token *tok) {
             lvar->offset = 8;
         }
         node->offset = lvar->offset;
-        locals->data[func_cnt-1] = lvar;
+        locals->data[func_cnt] = lvar;
     }
 
     return node;
@@ -97,13 +97,14 @@ Node *new_node_func_call(Token *tok, Vector *args) {
     return node;
 }
 
-Node *new_node_func_declare(Token *tok) {
+Node *new_node_func_declare(Token *tok, Vector *block_stmts, Vector *params) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_FUNC_DECLARE;
     node->name = tok->input;
     node->len = tok->len;
-    node->block_stmts = new_vector();
+    node->block_stmts = block_stmts;
     node->func_num = func_cnt++;
+    node->params = params;
     
     return node;
 }
@@ -144,6 +145,9 @@ Node *func() {
     Node *node;
 
     if (consume(TK_IDENT)) {
+        Vector *params = NULL;
+
+        vec_push(locals, NULL);
 
         if (!consume('(')) {
             token = get_token(pos);
@@ -151,8 +155,11 @@ Node *func() {
         }
 
         if (!consume(')')) {
-            token = get_token(pos);
-            error_at(token->input, "')'ではないトークンです");
+            params = parameter();
+            if (!consume(')')) {
+                token = get_token(pos);
+                error_at(token->input, "')'ではないトークンです");
+            }
         }
 
         if (!consume('{')) {
@@ -160,14 +167,12 @@ Node *func() {
             error_at(token->input, "'{'ではないトークンです");
         }
 
-        node = new_node_func_declare(token);
-        vec_push(locals, NULL);
-
+        Vector *block_stmts = new_vector();
         while (!consume('}')) {
-            vec_push(node->block_stmts, (void *)stmt());
+            vec_push(block_stmts, (void *)stmt());
         }
 
-        return node;
+        return new_node_func_declare(token, block_stmts, params);
     } else {
         error_at(token->input, "関数名ではないトークンです");
     }
@@ -364,7 +369,7 @@ Node *term() {
         return new_node_num(token->val);
     }
 
-    if (consume(TK_IDENT)) {        
+    if (consume(TK_IDENT)) {
         if (consume('(')) { // 関数呼び出し
 
             Vector *args = NULL;
@@ -397,5 +402,25 @@ Vector *argument() {
             }
         }
         vec_push(args, (void *)expr());
+    }
+}
+
+Vector *parameter() {
+    Vector *params = new_vector();
+
+    for (;;) {
+        Token *token;
+        if (params->len > 0) {
+            if (!consume(',')) {
+                return params;
+            }
+        }
+
+        token = get_token(pos);
+        if (consume(TK_IDENT)) {
+            vec_push(params, new_node_lvar(token));
+        } else {
+            error_at(token->input, "引数名ではないトークンです");
+        }
     }
 }

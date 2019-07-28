@@ -16,6 +16,7 @@ void gen(Node *node) {
     int cur_label_cnt;
     Vector *block_stmts;
     Vector *args;
+    Vector *params;
     LVar *func_local;
 
     switch (node->ty) {
@@ -154,6 +155,7 @@ void gen(Node *node) {
     case ND_FUNC_DECLARE:
         block_stmts = node->block_stmts;
         func_local = locals->data[node->func_num];
+        params = node->params;
 
         printf("%.*s:\n", node->len, node->name);
 
@@ -162,6 +164,13 @@ void gen(Node *node) {
         printf("  mov rbp, rsp\n");
         if (func_local)
             printf("  sub rsp, %d\n", func_local->offset);
+        if (params) {
+            printf("  mov r10, rbp\n");
+            for (int i = 0; i < params->len; i++) {
+                printf("  sub r10, 8\n");
+                printf("  mov [r10], %s\n", argregs[i]);
+            }
+        }
 
         for (int i = 0; i < block_stmts->len; i++) {          
             gen((Node *)block_stmts->data[i]);

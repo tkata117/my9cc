@@ -23,14 +23,14 @@ Node *new_node_num(int val) {
     return node;
 }
 
-Node *new_node_lvar(Token *tok) {
+Node *new_node_lvar_declare(Token *tok) {
     Node *node = malloc(sizeof(Node));
     node->ty = ND_LVAR;
     
     LVar *func_local = locals->data[func_cnt];
     LVar *lvar = find_lvar(func_local, tok);
     if (lvar) {
-        node->offset = lvar->offset;
+        error_at(tok->input, "宣言済みの変数です。");
     } else {
         lvar = malloc(sizeof(LVar));
         lvar->next = func_local;
@@ -43,6 +43,21 @@ Node *new_node_lvar(Token *tok) {
         }
         node->offset = lvar->offset;
         locals->data[func_cnt] = lvar;
+    }
+
+    return node;
+}
+
+Node *new_node_lvar_ref(Token *tok) {
+    Node *node = malloc(sizeof(Node));
+    node->ty = ND_LVAR;
+    
+    LVar *func_local = locals->data[func_cnt];
+    LVar *lvar = find_lvar(func_local, tok);
+    if (lvar) {
+        node->offset = lvar->offset;
+    } else {
+        error_at(tok->input, "宣言されていない変数です。");
     }
 
     return node;
@@ -142,7 +157,6 @@ void program() {
 
 Node *func() {
     Token *token = get_token(pos);
-    Node *node;
 
     if (consume(TK_IDENT)) {
         Vector *params = NULL;
@@ -264,6 +278,13 @@ Node *stmt() {
         }
 
         return node;
+    } else if (consume(TK_INT)) {
+        Token *token = get_token(pos);
+        if (!consume(TK_IDENT)) {
+            token = get_token(pos);
+            error_at(token->input, "変数名ではないトークンです");
+        }
+        node = new_node_lvar_declare(token);
     } else {
         node = expr();
     }
@@ -388,7 +409,7 @@ Node *term() {
             return new_node_func_call(token, args);
 
         } else { // 変数
-            return new_node_lvar(token);
+            return new_node_lvar_ref(token);
         }
     }
 
@@ -420,9 +441,14 @@ Vector *param() {
             }
         }
 
+        if (!consume(TK_INT)) {
+            token = get_token(pos);
+            error_at(token->input, "'int'ではないトークンです");
+        }
+
         token = get_token(pos);
         if (consume(TK_IDENT)) {
-            vec_push(params, new_node_lvar(token));
+            vec_push(params, new_node_lvar_declare(token));
         } else {
             error_at(token->input, "引数名ではないトークンです");
         }

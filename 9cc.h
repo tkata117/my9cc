@@ -31,6 +31,7 @@ enum {
     TK_ELSE,
     TK_WHILE,
     TK_FOR,
+    TK_INT,
     TK_EOF,
 };
 
@@ -107,7 +108,8 @@ void tokenize();
 Token *get_token(int idx);
 Node *new_node(int ty, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
-Node *new_node_lvar(Token *tok);
+Node *new_node_lvar_declare(Token *tok);
+Node *new_node_lvar_ref(Token *tok);
 Node *new_node_if(Node *cond, Node *then_stmt);
 Node *new_node_ifelse(Node *cond, Node *then_stmt, Node *else_stmt);
 Node *new_node_while(Node *cond, Node *then_stmt);

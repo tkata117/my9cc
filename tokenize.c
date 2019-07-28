@@ -81,6 +81,12 @@ void tokenize() {
             continue;
         }
 
+        if (strncmp(p, "int", 3) == 0) {
+            vec_push(tokens, (void *)new_token(TK_INT, 0, p, 3));
+            p += 3;
+            continue;
+        }
+
         if (*p == '+' || *p == '-' ||
             *p == '*' || *p == '/' ||
             *p == '(' || *p == ')' ||

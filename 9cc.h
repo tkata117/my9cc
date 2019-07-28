@@ -127,8 +127,8 @@ Node *add();
 Node *mul();
 Node *unary();
 Node *term();
-Vector *argument();
-Vector *parameter();
+Vector *arg();
+Vector *param();
 
 /*** codegen.c ***/
 void gen_lval(Node *node);

@@ -155,7 +155,7 @@ Node *func() {
         }
 
         if (!consume(')')) {
-            params = parameter();
+            params = param();
             if (!consume(')')) {
                 token = get_token(pos);
                 error_at(token->input, "')'ではないトークンです");
@@ -378,7 +378,7 @@ Node *term() {
 
             Vector *args = NULL;
             if (!consume(')')) {
-                args = argument();
+                args = arg();
                 if (!consume(')')) {
                     token = get_token(pos);
                     error_at( token->input, "')' がありません");
@@ -397,7 +397,7 @@ Node *term() {
     return NULL;
 }
 
-Vector *argument() {
+Vector *arg() {
     Vector *args = new_vector();
     for (;;) {
         if (args->len > 0) {
@@ -409,7 +409,7 @@ Vector *argument() {
     }
 }
 
-Vector *parameter() {
+Vector *param() {
     Vector *params = new_vector();
 
     for (;;) {

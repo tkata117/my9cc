@@ -156,4 +156,8 @@ try 3 "hoge(a) { a = a + 1; return a; } main() { a=1; b=hoge(a); return a+b; }"
 try 3 "sum(a, b) { c = a + b; return c; } main() { return sum(1, 2); }"
 try 10 "sum(a, b) { c = a + b; return c; } main() { a = sum(1, 2); b = sum(3, 4); return a+b; }"
 
+# ステップ16: 単項&と単項*
+try 3 "main() { x = 3; y = &x; return *y; }"
+try 3 "main() { x = 3; y = 5; z = &y + 8; return *z; }"
+
 echo OK

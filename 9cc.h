@@ -44,6 +44,8 @@ typedef struct {
 enum {
     ND_NUM = 256,
     ND_LVAR,
+    ND_ADDR,
+    ND_DEREF,
     ND_RETURN,
     ND_EQ,
     ND_NE,

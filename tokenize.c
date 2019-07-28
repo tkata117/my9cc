@@ -86,7 +86,7 @@ void tokenize() {
             *p == '(' || *p == ')' ||
             *p == '{' || *p == '}' ||
             *p == '=' || *p == ';' ||
-            *p == ',') {
+            *p == ',' || *p == '&' ) {
             vec_push(tokens, (void *)new_token(*p, 0, p, 1));
             p++;
             continue;

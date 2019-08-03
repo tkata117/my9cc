@@ -55,7 +55,7 @@ $ make test
 
 ```
 program    = func*
-func       = ident "(" param? ")" "{" stmt* "}";
+func       = "int" ident "(" param? ")" "{" stmt* "}";
 stmt       = "int" ident ";"
            | expr ";"
            | "{" stmt* "}"

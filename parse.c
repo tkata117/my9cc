@@ -156,8 +156,14 @@ void program() {
 }
 
 Node *func() {
-    Token *token = get_token(pos);
+    Token *token;
 
+    if (!consume(TK_INT)) {
+        token = get_token(pos);
+        error_at(token->input, "'int'ではないトークンです");
+    }
+
+    token = get_token(pos);
     if (consume(TK_IDENT)) {
         Vector *params = NULL;
 

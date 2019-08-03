@@ -160,4 +160,8 @@ try 10 "int sum(int a, int b) { int c; c = a + b; return c; } int main() { int a
 try 3 "int main() { int x; int y; x = 3; y = &x; return *y; }"
 try 3 "int main() { int x; int y; int z; x = 3; y = 5; z = &y + 8; return *z; }"
 
+
+# ステップ17: 暗黙の変数定義を廃止して、int というキーワードを導入
+## この機能をテストするために、これより上の全テストの記述を修正
+## (関数の型宣言と変数宣言を追加)
 echo OK
